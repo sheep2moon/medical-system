@@ -25,6 +25,7 @@ const Navigation = () => {
         username: data[0].username,
         visits: data[0].visits_id,
         age: data[0].age,
+        is_doctor: data[0].is_doctor,
       };
       dispatch(updateUser(userData));
     }

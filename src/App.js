@@ -7,6 +7,8 @@ import Register from './pages/Register';
 import Profile from './pages/Profile';
 import Navigation from './components/Navigation';
 import RequireAuth from './common/RequireAuth';
+import RequireDoctor from './common/RequireDoctor';
+import DoctorDashboard from './pages/DoctorDashboard';
 
 function App() {
   return (
@@ -20,6 +22,9 @@ function App() {
           <Route exact path='/login' element={<Login />} />
           <Route element={<RequireAuth />}>
             <Route exact path='/profile' element={<Profile />} />
+          </Route>
+          <Route element={<RequireDoctor />}>
+            <Route exact path='/dashboard' element={<DoctorDashboard />} />
           </Route>
         </Routes>
       </Router>

@@ -10,6 +10,7 @@ export const userSlice = createSlice({
     age: null,
     data: null,
     error: null,
+    is_doctor: false,
   },
   reducers: {
     updateUser: (state, action) => {
@@ -21,6 +22,7 @@ export const userSlice = createSlice({
         state.age = data?.age;
         state.username = data?.username;
         state.visits = data?.visits;
+        state.is_doctor = data?.is_doctor;
       }
     },
     addVisit: (state, action) => {

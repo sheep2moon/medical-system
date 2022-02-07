@@ -28,6 +28,7 @@ const NewVisit = () => {
 
   useEffect(() => {
     fetchDoctors();
+    return supabase.removeAllSubscriptions();
   }, []);
 
   return (
@@ -43,7 +44,9 @@ const NewVisit = () => {
         <SLabel>Wybierz specjaliste</SLabel>
         <DoctorList>
           {doctors.map((doctor) => (
-            <option value={doctor.id}>{doctor.username}</option>
+            <option key={doctor.id} value={doctor.id}>
+              {doctor.username}
+            </option>
           ))}
         </DoctorList>
         <DatePicker />

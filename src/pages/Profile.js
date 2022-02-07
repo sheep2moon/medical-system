@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { CenteredContainer } from '../components/Containers';
-import DatePicker from '../components/Profile/DatePicker';
 import NewVisit from '../components/Profile/NewVisit';
 import Options from '../components/Profile/Options';
 import YourVisits from '../components/Profile/YourVisits';
@@ -11,12 +9,9 @@ import EditProfile from '../components/Profile/EditProfile';
 import ToastAlert from '../components/ToastAlert';
 
 const Profile = () => {
-  const dispatch = useDispatch();
   const [error, setError] = useState();
   const [option, setOption] = useState(0);
-  const { id, age, email, visits, username } = useSelector(
-    (state) => state.user
-  );
+  const { email, visits, username } = useSelector((state) => state.user);
 
   return (
     <CenteredContainer>

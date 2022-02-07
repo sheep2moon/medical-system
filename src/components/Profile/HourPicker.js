@@ -6,6 +6,7 @@ const HourPicker = ({ options, selectedHour, setSelectedHour }) => {
     <PickerContainer>
       {options.map((option, index) => (
         <Option
+          key={index}
           onClick={() => setSelectedHour(index)}
           isActive={index === selectedHour}
         >
