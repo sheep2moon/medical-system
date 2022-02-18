@@ -14,11 +14,12 @@ const ToastAlert = ({ message, setAlertMessage, duration, color }) => {
       }, duration);
     }
   }, [duration, message, setAlertMessage]);
-
+  if (!message) {
+    return null;
+  }
   return (
     <AlertContainer isOpen={isOpen}>
       <AlertMessage>{message}</AlertMessage>
-
       <SecondaryButton onClick={() => setIsOpen(false)}>
         Zamknij
       </SecondaryButton>

@@ -4,24 +4,31 @@ import { BsCalendar } from 'react-icons/bs';
 import Calendar from './Calendar';
 import { format } from 'date-fns';
 
-const DatePicker = () => {
+const DatePicker = ({ setCurrentDate }) => {
   const inputRef = useRef();
   const [isOpen, setIsOpen] = useState(false);
   const toggleOpen = () => setIsOpen(!isOpen);
   const pickDate = (date) => {
     //change format of date here
     inputRef.current.value = format(date, 'yyyy-MM-dd');
+    setCurrentDate(format(date, 'yyyy-MM-dd'));
     toggleOpen();
   };
   return (
-    <DatePickerContainer>
+    <DatePickerContainer
+      onClick={() => {
+        if (!isOpen) {
+          setIsOpen(true);
+        }
+      }}
+    >
       <CalendarWrap isOpen={isOpen}>
         <Calendar pickDate={pickDate} />
       </CalendarWrap>
       <StyledInput ref={inputRef} type='text' />
       <PickerWrap onClick={toggleOpen}>
         <PickerIcon />
-        <p>Wybierz dzień</p>
+        <p>Kliknij aby wybrać</p>
       </PickerWrap>
     </DatePickerContainer>
   );
@@ -39,6 +46,7 @@ const DatePickerContainer = styled.div`
 const CalendarWrap = styled.div`
   display: ${({ isOpen }) => (isOpen ? 'block' : 'none')};
   position: absolute;
+  border: 4px solid #000;
   z-index: 10;
   top: 3em;
 `;

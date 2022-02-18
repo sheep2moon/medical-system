@@ -6,7 +6,6 @@ const RequireDoctor = () => {
   const user = supabase.auth.user();
   const { is_doctor } = useSelector((state) => state.user);
   const location = useLocation();
-  console.log(user);
   if (!user) {
     return <Navigate to='/login' state={{ from: location }} />;
   } else if (!is_doctor) {

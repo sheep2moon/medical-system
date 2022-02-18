@@ -8,13 +8,13 @@ import { useDispatch } from 'react-redux';
 import { updateUser } from '../../redux/userSlice';
 import { useNavigate } from 'react-router-dom';
 
-const Options = ({ setError, setOption, option }) => {
+const Options = ({ setAlertMessage, setOption, option }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const Logout = async () => {
     let { error } = await supabase.auth.signOut();
     if (error) {
-      setError(error);
+      setAlertMessage(error.message);
     } else {
       dispatch(updateUser(null));
       navigate('/');

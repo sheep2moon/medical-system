@@ -48,6 +48,7 @@ export default NewPrescription;
 const FormWrapper = styled.div`
   display: flex;
   flex-direction: column;
+  margin-top: 2rem;
 `;
 const SearchWrap = styled.div``;
 const SearchInput = styled.input`

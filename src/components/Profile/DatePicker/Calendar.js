@@ -22,9 +22,13 @@ export const months = [
 ];
 
 const Calendar = ({ pickDate }) => {
+  const now = Date.now();
   const [currentMonth, setCurrentMonth] = useState(new Date());
-
-  const backwardMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
+  const backwardMonth = () => {
+    if (now <= currentMonth) {
+      setCurrentMonth(subMonths(currentMonth, 1));
+    }
+  };
   const forwardMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
 
   return (
@@ -61,6 +65,7 @@ const CalendarHeading = styled.div`
   padding: 0.25rem 0.5rem;
   justify-content: space-between;
   background-color: #fff;
+  user-select: none;
   > span {
     display: flex;
     align-items: center;

@@ -63,7 +63,12 @@ const CalendarBody = ({ currentMonth, pickDate, startFromMonday = true }) => {
               <DayCell
                 key={index}
                 isCurrentMonth={isCurrentMonth}
-                onClick={() => pickDate(day)}
+                isAvailable={day > Date.now()}
+                onClick={() => {
+                  if (day > Date.now()) {
+                    pickDate(day);
+                  }
+                }}
               >
                 <p>{getDate(day)}</p>
               </DayCell>
@@ -108,9 +113,12 @@ const DayCell = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  background: ${({ theme, isAvailable }) =>
+    isAvailable ? theme.light : theme.secondary};
   font-size: 1em;
+  font-weight: 700;
   outline: 1px solid #00000008;
-  opacity: ${({ isCurrentMonth }) => (isCurrentMonth ? 1 : 0.4)};
+  opacity: ${({ isCurrentMonth }) => (isCurrentMonth ? 1 : 0.6)};
   :hover {
     box-shadow: inset 0 0 12px 2px #00000030;
     cursor: pointer;

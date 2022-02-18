@@ -14,5 +14,6 @@ export const theme = {
   light: '#FFF7F7',
   dark: '#204969',
   primary: '#F7BE16',
-  secondary: '#FFFFE7',
+  secondary: '#2666CF',
+  green: '#BAFFB4',
 };

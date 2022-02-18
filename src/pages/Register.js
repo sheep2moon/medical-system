@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { PrimaryButton } from '../components/Buttons';
-import { CenteredContainer } from '../components/Containers';
+import { CenteredContainer, VerticalSpace } from '../components/Containers';
+import { StyledInput, StyledLabel } from '../components/Forms';
 import { supabase } from '../supabaseConfig';
 
 const Register = () => {
@@ -11,6 +13,7 @@ const Register = () => {
   const [password, setPassword] = useState('');
   const [repeatPassword, setRepeatPassword] = useState('');
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleSignup = async (email, password, repeatPassword) => {
     if (password !== repeatPassword) {
@@ -18,8 +21,9 @@ const Register = () => {
     }
     try {
       setLoading(true);
-      const { error } = await supabase.auth.signUp({ email, password });
+      const { error, data } = await supabase.auth.signUp({ email, password });
       if (error) throw error;
+      console.log('register', data);
       navigate('/login');
     } catch (error) {
       console.log('error', error);
@@ -40,16 +44,19 @@ const Register = () => {
           />
           <StyledLabel>Hasło</StyledLabel>
           <StyledInput
+            type='password'
             id='password'
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
           <StyledLabel>Powtórz hasło</StyledLabel>
           <StyledInput
+            type='password'
             id='repeat-password'
             value={repeatPassword}
             onChange={(e) => setRepeatPassword(e.target.value)}
           />
+          <VerticalSpace height={2} />
           <PrimaryButton
             onClick={(e) => {
               e.preventDefault();
@@ -60,8 +67,8 @@ const Register = () => {
             {loading ? 'Czekaj...' : 'Zarejestruj'}
           </PrimaryButton>
           <BottomTextWrap>
-            <p>Nie masz konta?</p>
-            <StyledLink to='/register'>Zarejestruj się</StyledLink>
+            <p>Masz już konto?</p>
+            <StyledLink to='/login'>Zaloguj się</StyledLink>
           </BottomTextWrap>
         </StyledForm>
       </CenteredContainer>
@@ -72,20 +79,18 @@ const Register = () => {
 export default Register;
 
 const StyledForm = styled.form`
+  margin: auto 0;
   padding: 2rem;
   display: flex;
   flex-direction: column;
-`;
-const StyledInput = styled.input`
-  padding: 1rem;
-  margin-bottom: 0.5rem;
-`;
-const StyledLabel = styled.label`
-  font-size: 1.4rem;
+  width: 100%;
+  max-width: 400px;
 `;
 const BottomTextWrap = styled.div`
+  width: 100%;
   display: flex;
-  font-size: 1.2rem;
+  justify-content: center;
+  font-size: 1.4rem;
 `;
 
 const StyledLink = styled(Link)`

@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
+import { useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { PrimaryButton } from '../components/Buttons';
-import { CenteredContainer } from '../components/Containers';
+import { CenteredContainer, VerticalSpace } from '../components/Containers';
+import { StyledForm, StyledInput, StyledLabel } from '../components/Forms';
 import ToastAlert from '../components/ToastAlert';
-import { updateUser } from '../redux/userSlice';
+import { fetchUserProfile } from '../redux/userSlice';
 import { supabase } from '../supabaseConfig';
 
 const Register = () => {
@@ -13,20 +16,28 @@ const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
-  const [error, setError] = useState(null);
+  const [alertMessage, setAlertMessage] = useState('');
+  const { is_doctor, id } = useSelector((state) => state.user);
   const dispatch = useDispatch();
 
   const handleLogin = async (email, password) => {
     try {
       setLoading(true);
       const res = await supabase.auth.signIn({ email, password });
-      if (res.error) throw error;
-      console.log(res);
-      dispatch(updateUser(res.user));
-      navigate('/profile');
+      if (res.error) throw res.error;
+      console.log('login', res);
+      dispatch(fetchUserProfile(res.user.id));
+      if (res.user.is_doctor) {
+        navigate('/dashboard');
+      } else {
+        navigate('/profile');
+      }
     } catch (error) {
-      console.log(error);
-      setError(error.message);
+      if (error) {
+        setAlertMessage(error.message);
+      } else {
+        setAlertMessage('Nieprawidłowe dane');
+      }
     } finally {
       setLoading(false);
     }
@@ -35,7 +46,12 @@ const Register = () => {
   return (
     <>
       <CenteredContainer>
-        {error && <ToastAlert message={error} duration={false} />}
+        <ToastAlert
+          message={alertMessage}
+          setAlertMessage={setAlertMessage}
+          duration={5000}
+        />
+
         <StyledForm>
           <StyledLabel>Adres email</StyledLabel>
           <StyledInput
@@ -46,9 +62,11 @@ const Register = () => {
           <StyledLabel>Hasło</StyledLabel>
           <StyledInput
             id='password'
+            type='password'
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
+          <VerticalSpace height={2} />
           <PrimaryButton
             onClick={(e) => {
               e.preventDefault();
@@ -58,6 +76,10 @@ const Register = () => {
           >
             {loading ? 'Czekaj...' : 'Zaloguj'}
           </PrimaryButton>
+          <BottomTextWrap>
+            <p>Nie masz konta?</p>
+            <StyledLink to='/register'>Zarejestruj się</StyledLink>
+          </BottomTextWrap>
         </StyledForm>
       </CenteredContainer>
     </>
@@ -66,16 +88,15 @@ const Register = () => {
 
 export default Register;
 
-const StyledForm = styled.form`
-  padding: 2rem;
+const BottomTextWrap = styled.div`
+  width: 100%;
   display: flex;
-  flex-direction: column;
-`;
-const StyledInput = styled.input`
-  padding: 1rem;
+  justify-content: center;
   font-size: 1.4rem;
-  margin-bottom: 0.5rem;
 `;
-const StyledLabel = styled.label`
-  font-size: 1.4rem;
+
+const StyledLink = styled(Link)`
+  text-decoration: none;
+  font-weight: 700;
+  margin-left: 0.75rem;
 `;

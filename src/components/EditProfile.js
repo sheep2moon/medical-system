@@ -3,10 +3,10 @@ import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { updateUser } from '../../redux/userSlice';
-import { supabase } from '../../supabaseConfig';
-import { SecondaryButton } from '../Buttons';
-import ToastAlert from '../ToastAlert';
+import { updateUser } from '../redux/userSlice';
+import { supabase } from '../supabaseConfig';
+import { SecondaryButton } from './Buttons';
+import ToastAlert from './ToastAlert';
 
 const UserInfo = () => {
   const [inputUsername, setInputUsername] = useState('');
@@ -17,7 +17,7 @@ const UserInfo = () => {
   const [alertMessage, setAlertMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
-  const { age, username } = useSelector((state) => state.user);
+  const { age, username, is_doctor } = useSelector((state) => state.user);
   useEffect(() => {
     if (age) setInputAge(age);
     if (username) setInputUsername(username);
@@ -74,11 +74,15 @@ const UserInfo = () => {
           value={inputUsername}
           onChange={(e) => setInputUsername(e.target.value)}
         />
-        <SLabel>Wiek</SLabel>
-        <SInput
-          value={inputAge}
-          onChange={(e) => setInputAge(e.target.value)}
-        />
+        {!is_doctor && (
+          <>
+            <SLabel>Wiek</SLabel>
+            <SInput
+              value={inputAge}
+              onChange={(e) => setInputAge(e.target.value)}
+            />
+          </>
+        )}
         <SecondaryButton
           onClick={(e) => {
             e.preventDefault();
