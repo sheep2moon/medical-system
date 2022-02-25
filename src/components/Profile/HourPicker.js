@@ -1,5 +1,5 @@
-import React from 'react';
-import styled from 'styled-components';
+import React from "react";
+import styled from "styled-components";
 
 const HourPicker = ({ options, selectedHour, setSelectedHour }) => {
   return (
@@ -28,6 +28,8 @@ export default HourPicker;
 
 const PickerContainer = styled.div`
   display: flex;
+  max-width: 400px;
+  flex-wrap: wrap;
   gap: 2px;
 `;
 const Option = styled.div`

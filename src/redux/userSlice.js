@@ -1,20 +1,20 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { supabase } from '../supabaseConfig';
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { supabase } from "../supabaseConfig";
 
 export const fetchUserProfile = createAsyncThunk(
-  'users/fetchProfile',
+  "users/fetchProfile",
   async (userId, ThunkApi) => {
-    const res = await supabase.from('profiles').select().eq('id', userId);
+    const res = await supabase.from("profiles").select().eq("id", userId);
     return res.data;
   }
 );
 
 export const userSlice = createSlice({
-  name: 'user',
+  name: "user",
   initialState: {
-    id: '',
+    id: "",
     visits: [],
-    username: '',
+    username: "",
     age: null,
     data: null,
     error: null,
@@ -49,14 +49,13 @@ export const userSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addCase(fetchUserProfile.fulfilled, (state, action) => {
-      console.log('====================================');
-      console.log(action.payload);
-      console.log('====================================');
-      state.id = action.payload[0].id;
-      state.age = action.payload[0].age;
-      state.username = action.payload[0].username;
-      state.visits = action.payload[0].visits_id;
-      state.is_doctor = action.payload[0].is_doctor;
+      if (action.payload[0]?.id) {
+        state.id = action.payload[0]?.id;
+      }
+      state.age = action.payload[0]?.age;
+      state.username = action.payload[0]?.username;
+      state.visits = action.payload[0]?.visits_id;
+      state.is_doctor = action.payload[0]?.is_doctor;
     });
   },
 });

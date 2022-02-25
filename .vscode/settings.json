@@ -1,3 +1,7 @@
 {
-  "terminal.integrated.mouseWheelScrollSensitivity": 0.1
+  "terminal.integrated.mouseWheelScrollSensitivity": 0.1,
+  "emmet.includeLanguages": {
+    "javascript": "javascriptreact"
+  },
+  "editor.formatOnSave": true
 }

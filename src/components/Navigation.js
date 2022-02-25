@@ -1,14 +1,16 @@
 import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useDispatch } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { fetchUserProfile } from '../redux/userSlice';
+import { fetchUserProfile, updateUser } from '../redux/userSlice';
 import { supabase } from '../supabaseConfig';
 import { GiHospitalCross } from 'react-icons/gi';
+import { PrimaryButton } from './Buttons.js';
 const Navigation = () => {
   const dispatch = useDispatch();
-  const { username } = useSelector((state) => state.user);
+  const { id } = useSelector((state) => state.user);
+  const navigate = useNavigate()
 
   useEffect(() => {
     const user = supabase.auth.user();
@@ -17,17 +19,33 @@ const Navigation = () => {
     }
   }, []);
 
+  const logout = async () => {
+    let { error } = await supabase.auth.signOut();
+    if(error){
+      console.log(error);
+    }else{
+      dispatch(updateUser(null));
+      navigate('/');
+    }
+  };
+
+  const navigateToLogin = () => {
+    navigate('/login')
+  }
+
   return (
     <NavContainer>
       <Navbar>
         <LogoWrap>
           <GiHospitalCross />
           <h1>Medyczny System Pacjenta</h1>
+
         </LogoWrap>
-        {username ? (
-          <NavLink to='/profile'>{username}</NavLink>
+        
+        {id ? (
+          <NavButton onClick={logout}>Wyloguj</NavButton>
         ) : (
-          <NavLink to='/login'>Zaloguj</NavLink>
+          <NavButton onClick={navigateToLogin}>Zaloguj</NavButton>
         )}
       </Navbar>
     </NavContainer>
@@ -40,7 +58,7 @@ const NavContainer = styled.div`
   position: fixed;
   top: 0;
   width: 100vw;
-  height: 6rem;
+  height: 4rem;
   z-index: 999;
   background: ${({ theme }) => theme.light};
   box-shadow: 0 0 25px 2px #00000070;
@@ -58,23 +76,26 @@ const Navbar = styled.nav`
 const LogoWrap = styled.div`
   display: flex;
   align-items: center;
-  font-size: 1.8rem;
+  font-size: 1.4rem;
   color: ${({ theme }) => theme.secondary};
   svg {
     color: ${({ theme }) => theme.secondary};
-    font-size: 4rem;
+    font-size: 3rem;
     margin-right: 0.5rem;
   }
 `;
-const NavLink = styled(Link)`
+const NavButton = styled.button`
   background: ${({ theme }) => theme.secondary};
   color: ${({ theme }) => theme.light};
   border-radius: 0.25rem;
   padding: 0 1rem;
-  font-size: 1.6rem;
-  text-decoration: none;
-  margin: 0 1rem;
-  :last-child {
-    margin-left: auto;
+  font-size: 1.2rem;
+  margin: 0 1rem 0 auto;
+  transition: all 0.2s ease-in-out;
+  :hover{
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+    box-shadow: ${({theme}) => `0 2px 4px ${theme.dark}`};
   }
+  
 `;

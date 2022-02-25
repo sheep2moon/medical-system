@@ -1,47 +1,54 @@
-import React, { useState } from 'react';
-import { useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import { useDispatch } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
-import { PrimaryButton } from '../components/Buttons';
-import { CenteredContainer, VerticalSpace } from '../components/Containers';
-import { StyledForm, StyledInput, StyledLabel } from '../components/Forms';
-import ToastAlert from '../components/ToastAlert';
-import { fetchUserProfile } from '../redux/userSlice';
-import { supabase } from '../supabaseConfig';
+import React, { useState } from "react";
+import { useEffect } from "react";
+import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
+import styled from "styled-components";
+import { PrimaryButton } from "../components/Buttons";
+import { CenteredContainer, VerticalSpace } from "../components/Containers";
+import { StyledForm, StyledInput, StyledLabel } from "../components/Forms";
+import ToastAlert from "../components/ToastAlert";
+import { fetchUserProfile, updateUser } from "../redux/userSlice";
+import { supabase } from "../supabaseConfig";
 
 const Register = () => {
   const [loading, setLoading] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
-  const [alertMessage, setAlertMessage] = useState('');
-  const { is_doctor, id } = useSelector((state) => state.user);
+  const [alertMessage, setAlertMessage] = useState("");
   const dispatch = useDispatch();
+  const { id } = useSelector((state) => state.user);
 
   const handleLogin = async (email, password) => {
     try {
       setLoading(true);
       const res = await supabase.auth.signIn({ email, password });
       if (res.error) throw res.error;
-      console.log('login', res);
+      console.log("login", res);
       dispatch(fetchUserProfile(res.user.id));
-      if (res.user.is_doctor) {
-        navigate('/dashboard');
-      } else {
-        navigate('/profile');
+      dispatch(updateUser({ id: res.user.id }));
+      if (!res.user.is_doctor) {
+        navigate("/profile");
+      } else if (res.user.is_doctor) {
+        navigate("/dashboard");
       }
     } catch (error) {
       if (error) {
         setAlertMessage(error.message);
       } else {
-        setAlertMessage('Nieprawidłowe dane');
+        setAlertMessage("Nieprawidłowe dane");
       }
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (id) {
+      navigate("/profile");
+    }
+  }, [id, navigate]);
 
   return (
     <>
@@ -55,14 +62,14 @@ const Register = () => {
         <StyledForm>
           <StyledLabel>Adres email</StyledLabel>
           <StyledInput
-            id='email'
+            id="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
           <StyledLabel>Hasło</StyledLabel>
           <StyledInput
-            id='password'
-            type='password'
+            id="password"
+            type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
@@ -74,11 +81,11 @@ const Register = () => {
             }}
             disabled={loading}
           >
-            {loading ? 'Czekaj...' : 'Zaloguj'}
+            {loading ? "Czekaj..." : "Zaloguj"}
           </PrimaryButton>
           <BottomTextWrap>
             <p>Nie masz konta?</p>
-            <StyledLink to='/register'>Zarejestruj się</StyledLink>
+            <StyledLink to="/register">Zarejestruj się</StyledLink>
           </BottomTextWrap>
         </StyledForm>
       </CenteredContainer>

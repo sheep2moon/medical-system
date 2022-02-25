@@ -1,8 +1,8 @@
-import React, { useRef, useState } from 'react';
-import styled from 'styled-components';
-import { BsCalendar } from 'react-icons/bs';
-import Calendar from './Calendar';
-import { format } from 'date-fns';
+import React, { useRef, useState } from "react";
+import styled from "styled-components";
+import { BsCalendar } from "react-icons/bs";
+import Calendar from "./Calendar";
+import { format } from "date-fns";
 
 const DatePicker = ({ setCurrentDate }) => {
   const inputRef = useRef();
@@ -10,10 +10,11 @@ const DatePicker = ({ setCurrentDate }) => {
   const toggleOpen = () => setIsOpen(!isOpen);
   const pickDate = (date) => {
     //change format of date here
-    inputRef.current.value = format(date, 'yyyy-MM-dd');
-    setCurrentDate(format(date, 'yyyy-MM-dd'));
+    inputRef.current.value = format(date, "yyyy-MM-dd");
+    setCurrentDate(format(date, "yyyy-MM-dd"));
     toggleOpen();
   };
+
   return (
     <DatePickerContainer
       onClick={() => {
@@ -25,7 +26,7 @@ const DatePicker = ({ setCurrentDate }) => {
       <CalendarWrap isOpen={isOpen}>
         <Calendar pickDate={pickDate} />
       </CalendarWrap>
-      <StyledInput ref={inputRef} type='text' />
+      <StyledInput ref={inputRef} type="text" disabled />
       <PickerWrap onClick={toggleOpen}>
         <PickerIcon />
         <p>Kliknij aby wybrać</p>
@@ -44,7 +45,7 @@ const DatePickerContainer = styled.div`
   width: 28em;
 `;
 const CalendarWrap = styled.div`
-  display: ${({ isOpen }) => (isOpen ? 'block' : 'none')};
+  display: ${({ isOpen }) => (isOpen ? "block" : "none")};
   position: absolute;
   border: 4px solid #000;
   z-index: 10;

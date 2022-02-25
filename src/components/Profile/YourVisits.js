@@ -1,20 +1,40 @@
-import React, { useState } from 'react';
-import { useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import styled from 'styled-components';
-import { supabase } from '../../supabaseConfig';
+import React, { useState } from "react";
+import { useEffect } from "react";
+import { useSelector } from "react-redux";
+import styled from "styled-components";
+import { supabase } from "../../supabaseConfig";
+import { Oval } from "react-loader-spinner";
+import { VerticallyCentered } from "../Containers";
+import { PrimaryButton } from "../Buttons.js";
 
 const YourVisits = ({ setAlertMessage }) => {
-  const [visitList, setVisitList] = useState();
+  const [visitList, setVisitList] = useState([]);
   const { id } = useSelector((state) => state.user);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(null);
 
+  const handleCancelVisit = async (id) => {
+    setLoading(true);
+    try {
+      const { error } = await supabase.from("visits").delete().eq("id", id);
+      if (error) throw error;
+      else {
+        setVisitList(visitList.filter((visit) => visit.id !== id));
+        setAlertMessage("Wizyta anulowana");
+      }
+    } catch (error) {
+      setAlertMessage(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
   const fetchVisits = async () => {
+    setLoading(true);
+    console.log(id);
     try {
       const { error, data } = await supabase
-        .from('visits')
+        .from("visits")
         .select()
-        .eq('patient_id', id);
+        .eq("patient_id", id);
       if (error) {
         throw error;
       } else {
@@ -29,45 +49,70 @@ const YourVisits = ({ setAlertMessage }) => {
   };
 
   useEffect(() => {
-    fetchVisits();
-  }, []);
+    if (id) {
+      fetchVisits();
+    }
+  }, [id]);
 
+  if (loading)
+    return (
+      <VerticallyCentered>
+        {" "}
+        <Oval color="#2666CF" ariaLabel="loading" />{" "}
+      </VerticallyCentered>
+    );
+
+  if (visitList.length === 0) {
+    return <EmptyMessage>Brak umówionych wizyt</EmptyMessage>;
+  }
   return (
     <>
-      {loading ? (
-        <h1>Wczytywanie...</h1>
-      ) : (
-        <div>
-          <h1>twoje wizyty</h1>
-          <VisitsWrap>
-            {visitList?.length &&
-              visitList.map((visit) => (
-                <Visit key={visit.created_at}>
-                  <h4>Dnia</h4>
-                  <p>{visit.day}</p>
-                  <h4>Godzina</h4>
-                  <p>{visit.hour}</p>
-                  <h4>Doktor</h4>
-                  <p>{visit.doctor_id}</p>
-                </Visit>
-              ))}
-          </VisitsWrap>
-        </div>
-      )}
+      <h1>twoje wizyty</h1>
+      <VisitsWrap>
+        {visitList.length &&
+          visitList.map((visit) => (
+            <Visit key={visit.created_at} isExpired={visit.day}>
+              <Col>
+                <p>
+                  Dnia <span>{visit.day}</span>o godzinie{" "}
+                  <span>{visit.hour}</span>{" "}
+                </p>
+                <p>specjalista: {visit.doctor_username}</p>
+              </Col>
+              <PrimaryButton onClick={() => handleCancelVisit(visit.id)}>
+                Anuluj
+              </PrimaryButton>
+            </Visit>
+          ))}
+      </VisitsWrap>
     </>
   );
 };
 
 export default YourVisits;
 
+const EmptyMessage = styled.h2`
+  margin: auto 0;
+`;
 const VisitsWrap = styled.div`
-  border: ${({ theme }) => `4px solid ${theme.secondary}`};
   border-radius: 1rem;
   padding: 1rem;
+  width: 100%;
 `;
+const Col = styled.div``;
 const Visit = styled.div`
-  display: grid;
-  grid-template-columns: 0.5fr 2fr;
   font-size: 1.6rem;
   font-weight: 700;
+  display: flex;
+  background-color: #eee;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  justify-content: space-between;
+  align-items: center;
+  p {
+    span {
+      color: ${({ theme }) => theme.secondary};
+      margin: 0 1rem;
+    }
+  }
 `;

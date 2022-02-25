@@ -1,39 +1,43 @@
-import React from 'react';
-import { useState } from 'react';
-import { useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import styled from 'styled-components';
-import { supabase } from '../../supabaseConfig';
-import { PrimaryButton, SecondaryButton } from '../Buttons';
-import ToastAlert from '../ToastAlert';
-import DatePicker from './DatePicker';
-import HourPicker from './HourPicker';
+import React from "react";
+import { useState } from "react";
+import { useEffect } from "react";
+import { useSelector } from "react-redux";
+import styled from "styled-components";
+import { supabase } from "../../supabaseConfig";
+import { SecondaryButton } from "../Buttons";
+import ToastAlert from "../ToastAlert";
+import DatePicker from "./DatePicker";
+import HourPicker from "./HourPicker";
 
 const NewVisit = () => {
-  const [alertMessage, setAlertMessage] = useState('');
-  const [selectedHour, setSelectedHour] = useState('');
+  const [loading, setLoading] = useState(null);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [selectedHour, setSelectedHour] = useState("");
   const [currentDate, setCurrentDate] = useState(null);
-  const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [selectedDoctor, setSelectedDoctor] = useState({ id: null, name: "" });
   const [termData, setTermData] = useState([]);
   const [hoursList, setHourList] = useState([]);
   const [doctors, setDoctors] = useState([]);
-  const { id } = useSelector((state) => state.user);
+  const { id, username } = useSelector((state) => state.user);
 
   //Fetching terms and doctor list
   const fetchData = async () => {
     const profiles_data = await supabase
-      .from('profiles')
+      .from("profiles")
       .select()
-      .eq('is_doctor', 'true');
+      .eq("is_doctor", "true");
     if (profiles_data.error) {
       setAlertMessage(profiles_data.error.message);
     }
     if (profiles_data.data) {
       setDoctors(profiles_data.data);
-      setSelectedDoctor(profiles_data.data[0].id);
+      setSelectedDoctor({
+        id: profiles_data.data[0].id,
+        name: profiles_data.data[0].username,
+      });
     }
 
-    const terms_data = await supabase.from('terms').select();
+    const terms_data = await supabase.from("terms").select();
     if (terms_data.error) {
       setAlertMessage(terms_data.error.message);
     }
@@ -52,59 +56,70 @@ const NewVisit = () => {
   useEffect(() => {
     setSelectedHour(null);
     if (termData[0]?.day && currentDate) {
-      console.log(currentDate);
-      console.log(termData);
       const new_list = termData.filter(
-        (row) => row.day === currentDate && row.doctor_id === selectedDoctor
+        (row) => row.day === currentDate && row.doctor_id === selectedDoctor.id
       );
-      console.log('list', hoursList);
       setHourList(new_list[0]?.free_hours);
     }
   }, [currentDate, selectedDoctor, termData]);
 
   //Add visit to database
   const handleAddVisit = async () => {
+    console.log(selectedDoctor);
+    setLoading(true);
     const visit_data = {
       day: currentDate,
       hour: hoursList[selectedHour],
-      doctor_id: selectedDoctor,
+      doctor_id: selectedDoctor.id,
+      doctor_username: selectedDoctor.name,
       patient_id: id,
     };
 
     const { error } = await supabase
-      .from('visits')
-      .insert(visit_data, { returning: 'minimal' });
+      .from("visits")
+      .insert(visit_data, { returning: "minimal" });
 
     if (error) {
       setAlertMessage(error.message);
     } else {
-      setAlertMessage('Wizyta umówiona');
+      setAlertMessage("Wizyta umówiona");
+      setHourList([]);
+      setCurrentDate(null);
     }
-
+    setLoading(false);
     updateTerms();
+  };
+
+  const handleSelectChange = (e) => {
+    const doctor = doctors.find((doctor) => doctor.id === e.target.value);
+    console.log(doctor);
+    setSelectedDoctor({ id: doctor.id, name: doctor.username });
   };
 
   const updateTerms = async () => {
     const this_day_terms = termData.filter(
       (row) => row.day === currentDate && row.doctor_id === selectedDoctor
     );
-    const busy_hours = this_day_terms[0].busy_hours;
-    const new_free_hours = hoursList;
-    const busy_hour = new_free_hours.splice(selectedHour, 1);
-    const terms = {
-      free_hours: new_free_hours,
-      busy_hours: [...busy_hours, busy_hour],
-    };
-    const { error } = await supabase
-      .from('terms')
-      .update(terms)
-      .match({ day: currentDate, doctor_id: selectedDoctor });
-
-    if (error) {
-      setAlertMessage(error.message);
+    if (this_day_terms.length > 0) {
+      const busy_hours = this_day_terms[0]?.busy_hours;
+      const new_free_hours = hoursList;
+      const busy_hour = new_free_hours.splice(selectedHour, 1);
+      const terms = {
+        free_hours: new_free_hours,
+        busy_hours: [...busy_hours, busy_hour],
+      };
+      const { error } = await supabase.from("terms").update(terms).match({
+        day: currentDate,
+        doctor_id: selectedDoctor.id,
+      });
+      if (error) {
+        setAlertMessage(error.message);
+      }
     }
   };
-
+  if (!username) {
+    return <h2>Najpierw ustaw dane personalne w zakładce Edytuj Profil</h2>;
+  }
   return (
     <>
       {alertMessage && (
@@ -117,22 +132,25 @@ const NewVisit = () => {
       <FormWrapper>
         <SLabel>Wybierz lekarza z listy</SLabel>
         <DoctorList
-          value={selectedDoctor}
-          onChange={(e) => setSelectedDoctor(e.target.value)}
+          value={selectedDoctor.username}
+          onChange={handleSelectChange}
         >
-          {doctors.map((doctor) => (
-            <option key={doctor.id} value={doctor.id}>
-              {doctor.username}
-            </option>
-          ))}
+          <>
+            {!doctors.length && <option>Czekaj...</option>}
+            {doctors.map((doctor) => (
+              <option key={doctor.id} value={doctor.id}>
+                {doctor.username}
+              </option>
+            ))}
+          </>
         </DoctorList>
         <SLabel>Wybierz dzień</SLabel>
         <DatePicker setCurrentDate={setCurrentDate} />
         <ResultContainer>
           <SLabel>
             {hoursList?.length
-              ? 'Dostępne godziny:'
-              : 'Brak dostępnych terminów tego dnia, wybierz inny dzień'}
+              ? "Dostępne godziny:"
+              : "Brak dostępnych terminów tego dnia, wybierz inny dzień"}
           </SLabel>
           <HourPicker
             options={hoursList}
@@ -141,7 +159,12 @@ const NewVisit = () => {
           />
         </ResultContainer>
 
-        <SecondaryButton onClick={handleAddVisit}>Potwierdź</SecondaryButton>
+        <SecondaryButton
+          onClick={handleAddVisit}
+          disabled={loading ? true : false}
+        >
+          {loading ? "Czekaj..." : "Potwierdź"}
+        </SecondaryButton>
       </FormWrapper>
     </>
   );

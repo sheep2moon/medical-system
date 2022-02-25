@@ -1,3 +1,4 @@
+import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
 import { Routes, BrowserRouter as Router, Route } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
 import { GlobalStyle, theme } from './common/Theme';

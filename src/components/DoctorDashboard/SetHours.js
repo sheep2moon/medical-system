@@ -1,33 +1,42 @@
-import { addMinutes, getTime, set } from 'date-fns';
-import React, { useState } from 'react';
-import { useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import styled from 'styled-components';
-import { supabase } from '../../supabaseConfig';
-import { PrimaryButton } from '../Buttons';
-import DatePicker from '../Profile/DatePicker';
-import ToastAlert from '../ToastAlert';
+import { addMinutes, getTime, set } from "date-fns";
+import React, { useState } from "react";
+import { useEffect } from "react";
+import { Oval } from "react-loader-spinner";
+import { useSelector } from "react-redux";
+import styled from "styled-components";
+import { supabase } from "../../supabaseConfig";
+import { PrimaryButton } from "../Buttons";
+import { VerticallyCentered } from "../Containers.js";
+import DatePicker from "../Profile/DatePicker";
+import ToastAlert from "../ToastAlert";
 
 const SetHours = () => {
+  const [loading, setLoading] = useState(false);
   const [hourList, setHourList] = useState([]);
   const [pickedHours, setPickedHours] = useState([]);
   const [currentDate, setCurrentDate] = useState(null);
   const { id } = useSelector((state) => state.user);
-  const [alertMessage, setAlertMessage] = useState('');
+  const [alertMessage, setAlertMessage] = useState("");
   const [writedTerms, setWritedTerms] = useState([]);
+  const [termCount, setTermCount] = useState(null);
 
   const fetchTerms = async () => {
-    const { data, error } = await supabase.from('terms').select();
+    const { data, error } = await supabase.from("terms").select();
     if (error) {
       setAlertMessage(error.message);
     } else {
       if (data) {
-        setWritedTerms(data.filter((row) => row.doctor_id === id));
+        const newTerms = data.filter((row) => row.doctor_id === id);
+        setWritedTerms(newTerms);
+        let freeHoursSum = 0;
+        newTerms.forEach((term) => (freeHoursSum += term.free_hours.length));
+        setTermCount(freeHoursSum);
       }
     }
   };
 
   const handleAddTerms = async () => {
+    setLoading(true);
     const terms = {
       doctor_id: id,
       day: currentDate,
@@ -37,23 +46,28 @@ const SetHours = () => {
     let error;
     if (writedTerms.some((el) => el.day === currentDate)) {
       ({ error } = await supabase
-        .from('terms')
+        .from("terms")
         .update(terms)
         .match({ day: currentDate, doctor_id: id }));
       if (!error) {
-        setAlertMessage('Pomyślnie zaktualizowano terminy');
+        setAlertMessage("Pomyślnie zaktualizowano terminy");
         fetchTerms();
+        setPickedHours([]);
+        setCurrentDate(null);
       }
     } else {
-      ({ error } = await supabase.from('terms').insert(terms));
+      ({ error } = await supabase.from("terms").insert(terms));
       if (!error) {
-        setAlertMessage('Pomyślnie dodano terminy');
+        setAlertMessage("Pomyślnie dodano terminy");
         fetchTerms();
+        setPickedHours([]);
+        setCurrentDate(null);
       }
     }
     if (error) {
       setAlertMessage(error.message);
     }
+    setLoading(false);
   };
 
   const generateHourList = () => {
@@ -77,13 +91,18 @@ const SetHours = () => {
   useEffect(() => {
     setPickedHours([]);
     writedTerms.map((row) => {
-      console.log(row.day, currentDate);
       if (row.day === currentDate) {
         setPickedHours(row.free_hours);
       }
     });
   }, [currentDate]);
-
+  if (loading)
+    return (
+      <VerticallyCentered>
+        {" "}
+        <Oval color="#2666CF" ariaLabel="loading" />{" "}
+      </VerticallyCentered>
+    );
   return (
     <>
       {alertMessage && (
@@ -94,11 +113,12 @@ const SetHours = () => {
         />
       )}
       <FormContainer>
+        {termCount ? <h2>Obecnie {termCount} terminów wolnych</h2> : null}
         <h1>Wybierz dzień</h1>
         <DatePicker setCurrentDate={setCurrentDate} />
         <h1>Wybierz dostępne godziny</h1>
         <HourGrid>
-          {currentDate &&
+          {currentDate ? (
             hourList.map((hour) => (
               <HourPick
                 key={hour}
@@ -113,7 +133,10 @@ const SetHours = () => {
               >
                 {hour}
               </HourPick>
-            ))}
+            ))
+          ) : (
+            <p>Wybierz dzień w pierwszej kolejności</p>
+          )}
         </HourGrid>
         <PrimaryButton onClick={() => handleAddTerms()}>
           Zatwierdź
@@ -129,7 +152,6 @@ const FormContainer = styled.div`
   margin-top: 2rem;
   display: flex;
   flex-direction: column;
-  align-items: center;
 `;
 const HourGrid = styled.div`
   max-width: 600px;

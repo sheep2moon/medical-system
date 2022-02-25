@@ -1,12 +1,12 @@
-import React from 'react';
-import { BiExit } from 'react-icons/bi';
-import { CgProfile } from 'react-icons/cg';
-import { BsJournalBookmark, BsBook } from 'react-icons/bs';
-import styled from 'styled-components';
-import { useNavigate } from 'react-router-dom';
-import { supabase } from '../../supabaseConfig';
-import { useDispatch } from 'react-redux';
-import { updateUser } from '../../redux/userSlice';
+import React from "react";
+import { BiExit } from "react-icons/bi";
+import { CgProfile } from "react-icons/cg";
+import { BsJournalBookmark, BsBook } from "react-icons/bs";
+import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "../../supabaseConfig";
+import { useDispatch } from "react-redux";
+import { updateUser } from "../../redux/userSlice";
 
 const DashboardViews = ({ view, setView, setAlertMessage }) => {
   const navigate = useNavigate();
@@ -18,7 +18,7 @@ const DashboardViews = ({ view, setView, setAlertMessage }) => {
       setAlertMessage(error);
     } else {
       dispatch(updateUser(null));
-      navigate('/');
+      navigate("/");
     }
   };
 
@@ -58,11 +58,12 @@ const ViewsContainer = styled.div`
 const ViewButton = styled.button`
   cursor: pointer;
   display: flex;
+  margin-top: 1rem;
   align-items: center;
   font-size: 1.4rem;
   gap: 1rem;
   box-shadow: ${({ isActive, theme }) =>
-    isActive ? `0 5px 5px ${theme.primary}` : ''};
+    isActive ? `0 5px 5px ${theme.primary}` : ""};
   svg {
     font-size: 1.4rem;
     margin: 0 0.5rem;

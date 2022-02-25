@@ -1,20 +1,20 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
-import { CenteredContainer } from '../components/Containers';
-import DashboardViews from '../components/DoctorDashboard/DashboardViews';
-import NewPrescription from '../components/DoctorDashboard/NewPrescription';
-import SetHours from '../components/DoctorDashboard/SetHours';
-import ToastAlert from '../components/ToastAlert';
-import EditProfile from '../components/EditProfile';
+import React, { useState } from "react";
+import styled from "styled-components";
+import { CenteredContainer } from "../components/Containers";
+import DashboardViews from "../components/DoctorDashboard/DashboardViews";
+import NewPrescription from "../components/DoctorDashboard/NewPrescription";
+import SetHours from "../components/DoctorDashboard/SetHours";
+import ToastAlert from "../components/ToastAlert";
+import EditProfile from "../components/EditProfile";
+import DoctorVisits from "../components/DoctorDashboard/DoctorVisits";
 const DoctorDashboard = () => {
   const [view, setView] = useState(1);
-  const [alertMessage, setAlertMessage] = useState('');
+  const [alertMessage, setAlertMessage] = useState("");
   return (
     <>
       {alertMessage && <ToastAlert message={alertMessage} duration={5000} />}
       <CenteredContainer>
         <DashboardContainer>
-          <h1>witaj panmie doktorze</h1>
           <DashboardViews
             view={view}
             setView={setView}
@@ -23,6 +23,7 @@ const DoctorDashboard = () => {
           {view === 1 && <NewPrescription />}
           {view === 2 && <SetHours />}
           {view === 3 && <EditProfile />}
+          {view === 4 && <DoctorVisits />}
         </DashboardContainer>
       </CenteredContainer>
     </>

@@ -1,32 +1,35 @@
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
-import { PrimaryButton } from '../components/Buttons';
-import { CenteredContainer, VerticalSpace } from '../components/Containers';
-import { StyledInput, StyledLabel } from '../components/Forms';
-import { supabase } from '../supabaseConfig';
+import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
+import styled from "styled-components";
+import { PrimaryButton } from "../components/Buttons";
+import { CenteredContainer, VerticalSpace } from "../components/Containers";
+import { StyledInput, StyledLabel } from "../components/Forms";
+import ToastAlert from "../components/ToastAlert.js";
+import { supabase } from "../supabaseConfig";
 
 const Register = () => {
   const [loading, setLoading] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [repeatPassword, setRepeatPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+  const [password, setPassword] = useState("");
+  const [repeatPassword, setRepeatPassword] = useState("");
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const handleSignup = async (email, password, repeatPassword) => {
     if (password !== repeatPassword) {
+      setAlertMessage("Hasła nie są takie same");
       return;
     }
     try {
       setLoading(true);
       const { error, data } = await supabase.auth.signUp({ email, password });
       if (error) throw error;
-      console.log('register', data);
-      navigate('/login');
+      console.log("register", data);
+      navigate("/login");
     } catch (error) {
-      console.log('error', error);
+      console.log("error", error);
     } finally {
       setLoading(false);
     }
@@ -35,24 +38,31 @@ const Register = () => {
   return (
     <>
       <CenteredContainer>
+        {alertMessage && (
+          <ToastAlert
+            message={alertMessage}
+            setAlertMessage={setAlertMessage}
+            duration={false}
+          />
+        )}
         <StyledForm>
           <StyledLabel>Adres email</StyledLabel>
           <StyledInput
-            id='email'
+            id="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
           <StyledLabel>Hasło</StyledLabel>
           <StyledInput
-            type='password'
-            id='password'
+            type="password"
+            id="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
           <StyledLabel>Powtórz hasło</StyledLabel>
           <StyledInput
-            type='password'
-            id='repeat-password'
+            type="password"
+            id="repeat-password"
             value={repeatPassword}
             onChange={(e) => setRepeatPassword(e.target.value)}
           />
@@ -64,11 +74,11 @@ const Register = () => {
             }}
             disabled={loading}
           >
-            {loading ? 'Czekaj...' : 'Zarejestruj'}
+            {loading ? "Czekaj..." : "Zarejestruj"}
           </PrimaryButton>
           <BottomTextWrap>
             <p>Masz już konto?</p>
-            <StyledLink to='/login'>Zaloguj się</StyledLink>
+            <StyledLink to="/login">Zaloguj się</StyledLink>
           </BottomTextWrap>
         </StyledForm>
       </CenteredContainer>
